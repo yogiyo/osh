@@ -1826,7 +1826,6 @@ endpoints:
       ingress: null
     hosts:
       default: nova-metadata
-      public: metadata
     host_fqdn_override:
       default: null
     path:

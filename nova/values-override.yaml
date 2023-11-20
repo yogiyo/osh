@@ -56,15 +56,19 @@ network:
     private_key: 'null'
     public_key: 'null'
 
+ceph_client:
+  configmap: ceph-etc
+  user_secret_name: ceph-cinder-keyring
+
 
 conf:
   ceph:
-    enabled: false
-    admin_keyring: null
+    enabled: true
+    admin_keyring: AQA0clllewY3LRAAFlmuZpxDl5bw0jH3b3a7gg==
     cinder:
       user: "cinder"
-      keyring: null
-      secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+      keyring: AQCPZVtlw2HADBAApD4g6m64aKVZ3o4oAqfskQ==
+      secret_uuid: 9113cb92-a0c8-4178-97bb-d8786b3a0573
   libvirt:
     # Get the IP address to be used as the target for live migration traffic using interface name.
     # If this option is set to None, the hostname of the migration target compute node will be used.
@@ -145,10 +149,10 @@ conf:
       connection_uri: "qemu+unix:///system?socket=/run/libvirt/libvirt-sock"
       #virt_type: qemu
       images_type: qcow2
-      images_rbd_pool: vms
-      images_rbd_ceph_conf: /etc/ceph/ceph.conf
+      images_rbd_pool: openstack-cinder
+      images_rbd_ceph_conf: /etc/ceph/ceph.conf.template/ceph.conf
       rbd_user: cinder
-      rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+      rbd_secret_uuid: 9113cb92-a0c8-4178-97bb-d8786b3a0573
       disk_cachemodes: "network=writeback"
       hw_disk_discard: unmap
     upgrade_levels:
@@ -315,11 +319,14 @@ endpoints:
     port:
       mysql:
         default: 3306
-
+    hosts:
+      default: mariadb-server
   oslo_messaging:
     statefulset:
       replicas: 4
       name: openstack-rabbitmq-rabbitmq
+
+
 
   oslo_db_api:
     auth:
@@ -331,6 +338,8 @@ endpoints:
         password: 3HnijpfxBX4C2nsmNfjTKQ==
     path: /nova_api
     scheme: mysql+pymysql
+    hosts:
+      default: mariadb-server
     port:
       mysql:
         default: 3306
@@ -342,6 +351,8 @@ endpoints:
       nova:
         username: nova
         password: 3HnijpfxBX4C2nsmNfjTKQ==
+    hosts:
+      default: mariadb-server
     path: /nova_cell0
     scheme: mysql+pymysql
     port:
@@ -390,6 +401,14 @@ endpoints:
         region_name: RegionOne
         username: placement
         password: FwtGRVzOcgQjKAoB
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      cinder:
+        role: admin,service
+        region_name: RegionOne
+        username: cinder
+        password: password
         project_name: service
         user_domain_name: service
         project_domain_name: service
