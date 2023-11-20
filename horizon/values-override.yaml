@@ -21,7 +21,7 @@ pod:
 # values, but should include all endpoints
 # required by this chart
 endpoints:
-  identity:        
+  identity:       
     name: keystone
     auth:
       admin:
@@ -31,9 +31,11 @@ endpoints:
         project_name: admin
         user_domain_name: default
         project_domain_name: default
+    hosts:
+      default: keystone-api
+      internal: keystone-api
     host_fqdn_override:
       public:
-        default: keystone-api
         host: iam.cloud.dev.yogiyo.io
     path:
       default: /v3
@@ -78,8 +80,6 @@ endpoints:
       horizon:
         username: horizon
         password: 5/cTlzqTOsLpZl5e/tMhpQ==
-    host_fqdn_override:
-      default: mariadb-server.openstack.svc.cluster.local
     path: /horizon
     scheme: mysql+pymysql
     port:

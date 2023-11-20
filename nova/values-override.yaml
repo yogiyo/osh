@@ -1,0 +1,628 @@
+helm3_hook: false
+
+network:
+  backend:
+    - openvswitch
+  osapi:
+    port: 8774
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 30774
+  metadata:
+    port: 8775
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 30775
+  novncproxy:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    node_port:
+      enabled: false
+      port: 30680
+  spiceproxy:
+    node_port:
+      enabled: false
+      port: 30682
+  ssh:
+    enabled: false
+    port: 8022
+    from_subnet: 0.0.0.0/0
+    key_types:
+      - rsa
+      - dsa
+      - ecdsa
+      - ed25519
+    private_key: 'null'
+    public_key: 'null'
+
+
+conf:
+  ceph:
+    enabled: false
+    admin_keyring: null
+    cinder:
+      user: "cinder"
+      keyring: null
+      secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+  libvirt:
+    # Get the IP address to be used as the target for live migration traffic using interface name.
+    # If this option is set to None, the hostname of the migration target compute node will be used.
+    live_migration_interface:
+  hypervisor:
+    # my_ip can be set automatically through this interface name.
+    host_interface:
+  # This list is the keys to exclude from the config file ingested by nova-compute
+  nova_compute_redactions:
+    - database
+    - api_database
+    - cell0_database
+  nova:
+    DEFAULT:
+      log_config_append: /etc/nova/logging.conf
+      default_ephemeral_format: ext4
+      ram_allocation_ratio: 1.0
+      disk_allocation_ratio: 1.0
+      cpu_allocation_ratio: 3.0
+      state_path: /var/lib/nova
+      osapi_compute_listen: 0.0.0.0
+      # NOTE(portdirect): the bind port should not be defined, and is manipulated
+      # via the endpoints section.
+      osapi_compute_listen_port: null
+      osapi_compute_workers: 1
+      metadata_workers: 1
+      use_neutron: true
+      firewall_driver: nova.virt.firewall.NoopFirewallDriver
+      linuxnet_interface_driver: openvswitch
+      compute_driver: libvirt.LibvirtDriver
+      my_ip: 0.0.0.0
+      instance_usage_audit: True
+      instance_usage_audit_period: hour
+      notify_on_state_change: vm_and_task_state
+      resume_guests_state_on_host_boot: True
+    vnc:
+      novncproxy_host: 0.0.0.0
+      vncserver_listen: 0.0.0.0
+      # This would be set by each compute nodes's ip
+      # server_proxyclient_address: 127.0.0.1
+    spice:
+      html5proxy_host: 0.0.0.0
+      server_listen: 0.0.0.0
+      # This would be set by each compute nodes's ip
+      # server_proxyclient_address: 127.0.0.1
+    conductor:
+      workers: 1
+    oslo_policy:
+      policy_file: /etc/nova/policy.yaml
+    oslo_concurrency:
+      lock_path: /var/lib/nova/tmp
+    oslo_middleware:
+      enable_proxy_headers_parsing: true
+    glance:
+      num_retries: 3
+    ironic:
+      api_endpoint: null
+      auth_url: null
+    neutron:
+      metadata_proxy_shared_secret: "password"
+      service_metadata_proxy: True
+      auth_type: password
+      auth_version: v3
+    database:
+      max_retries: -1
+    api_database:
+      max_retries: -1
+    cell0_database:
+      max_retries: -1
+    keystone_authtoken:
+      auth_type: password
+      auth_version: v3
+      memcache_security_strategy: ENCRYPT
+    service_user:
+      auth_type: password
+      send_service_user_token: false
+    libvirt:
+      connection_uri: "qemu+unix:///system?socket=/run/libvirt/libvirt-sock"
+      #virt_type: qemu
+      images_type: qcow2
+      images_rbd_pool: vms
+      images_rbd_ceph_conf: /etc/ceph/ceph.conf
+      rbd_user: cinder
+      rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+      disk_cachemodes: "network=writeback"
+      hw_disk_discard: unmap
+    upgrade_levels:
+      compute: auto
+    cache:
+      enabled: true
+      backend: dogpile.cache.memcached
+    wsgi:
+      api_paste_config: /etc/nova/api-paste.ini
+    oslo_messaging_notifications:
+      driver: messagingv2
+    oslo_messaging_rabbit:
+      rabbit_ha_queues: true
+    placement:
+      auth_type: password
+      auth_version: v3
+  logging:
+    loggers:
+      keys:
+        - root
+        - nova
+        - os.brick
+    handlers:
+      keys:
+        - stdout
+        - stderr
+        - "null"
+    formatters:
+      keys:
+        - context
+        - default
+    logger_root:
+      level: WARNING
+      handlers: 'null'
+    logger_nova:
+      level: INFO
+      handlers:
+        - stdout
+      qualname: nova
+    logger_os.brick:
+      level: INFO
+      handlers:
+        - stdout
+      qualname: os.brick
+    logger_amqp:
+      level: WARNING
+      handlers: stderr
+      qualname: amqp
+    logger_amqplib:
+      level: WARNING
+      handlers: stderr
+      qualname: amqplib
+    logger_eventletwsgi:
+      level: WARNING
+      handlers: stderr
+      qualname: eventlet.wsgi.server
+    logger_sqlalchemy:
+      level: WARNING
+      handlers: stderr
+      qualname: sqlalchemy
+    logger_boto:
+      level: WARNING
+      handlers: stderr
+      qualname: boto
+    handler_null:
+      class: logging.NullHandler
+      formatter: default
+      args: ()
+    handler_stdout:
+      class: StreamHandler
+      args: (sys.stdout,)
+      formatter: context
+    handler_stderr:
+      class: StreamHandler
+      args: (sys.stderr,)
+      formatter: context
+    formatter_context:
+      class: oslo_log.formatters.ContextFormatter
+      datefmt: "%Y-%m-%d %H:%M:%S"
+    formatter_default:
+      format: "%(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+  rabbitmq:
+    # NOTE(rk760n): adding rmq policy to mirror messages from notification queues and set expiration time for the ones
+    policies:
+      - vhost: "nova"
+        name: "ha_ttl_nova"
+        definition:
+          # mirror messges to other nodes in rmq cluster
+          ha-mode: "all"
+          ha-sync-mode: "automatic"
+          # 70s
+          message-ttl: 70000
+        priority: 0
+        apply-to: all
+        pattern: '^(?!(amq\.|reply_)).*'
+  enable_iscsi: false
+  archive_deleted_rows:
+    purge_deleted_rows: false
+    until_completion: true
+    all_cells: false
+    max_rows:
+      enabled: False
+      rows: 1000
+    before:
+      enabled: false
+      date: 'nil'
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: nova-keystone-admin
+    nova: nova-keystone-user
+    test: nova-keystone-test
+  oslo_db:
+    admin: nova-db-admin
+    nova: nova-db-user
+  oslo_db_api:
+    admin: nova-db-api-admin
+    nova: nova-db-api-user
+  oslo_db_cell0:
+    admin: nova-db-cell0-admin
+    nova: nova-db-cell0-user
+  oslo_messaging:
+    admin: nova-rabbitmq-admin
+    nova: nova-rabbitmq-user
+  tls:
+    compute:
+      osapi:
+        public: nova-tls-public
+        internal: nova-tls-api
+    compute_novnc_proxy:
+      novncproxy:
+        public: nova-novncproxy-tls-public
+        internal: nova-novncproxy-tls-proxy
+    compute_metadata:
+      metadata:
+        public: metadata-tls-public
+        internal: metadata-tls-metadata
+    compute_spice_proxy:
+      spiceproxy:
+        internal: nova-tls-spiceproxy
+  oci_image_registry:
+    nova: nova-oci-image-registry
+
+# typically overridden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  cluster_domain_suffix: cluster.local
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: lgwXHkx6ZbK04RFFoE+JyQ==
+        secret:
+          tls:
+            internal: mariadb-tls-direct
+      nova:
+        username: nova
+        password: 3HnijpfxBX4C2nsmNfjTKQ==
+    path: /nova
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+
+  oslo_messaging:
+    statefulset:
+      replicas: 4
+      name: openstack-rabbitmq-rabbitmq
+
+  oslo_db_api:
+    auth:
+      admin:
+        username: root
+        password: lgwXHkx6ZbK04RFFoE+JyQ==
+      nova:
+        username: nova
+        password: 3HnijpfxBX4C2nsmNfjTKQ==
+    path: /nova_api
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  oslo_db_cell0:
+    auth:
+      admin:
+        username: root
+        password: lgwXHkx6ZbK04RFFoE+JyQ==
+      nova:
+        username: nova
+        password: 3HnijpfxBX4C2nsmNfjTKQ==
+    path: /nova_cell0
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: JcNvMAyVVka5eGwG
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      nova:
+        role: admin,service
+        region_name: RegionOne
+        username: nova
+        password: nNphw3aPUqhdr2pl
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      # NOTE(portdirect): the neutron user is not managed by the nova chart
+      # these values should match those set in the neutron chart.
+      neutron:
+        region_name: RegionOne
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+        username: neutron
+        password: QXCwd0vh7woCRiSu
+      # NOTE(portdirect): the ironic user is not managed by the nova chart
+      # these values should match those set in the ironic chart.
+      ironic:
+        auth_type: password
+        auth_version: v3
+        region_name: RegionOne
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+        username: ironic
+        password: password
+      placement:
+        role: admin
+        region_name: RegionOne
+        username: placement
+        password: FwtGRVzOcgQjKAoB
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      test:
+        role: admin
+        region_name: RegionOne
+        username: nova-test
+        password: password
+        project_name: test
+        user_domain_name: service
+        project_domain_name: service
+    host_fqdn_override:
+      public:
+        host: iam.cloud.dev.yogiyo.io
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 5000
+        internal: 5000
+        public: 80
+  image:
+    name: glance
+    host_fqdn_override:
+      public: 
+        host: images.cloud.dev.yogiyo.io
+    path:
+      default: null
+    scheme:
+      default: http
+    port:
+      api:
+        default: 9292
+        public: 80
+  compute:
+    name: nova
+    host_fqdn_override:
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      public:
+        host: compute.cloud.dev.yogiyo.io
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: "/v2.1/%(tenant_id)s"
+    scheme:
+      default: 'http'
+      service: 'http'
+    port:
+      api:
+        default: 8774
+        public: 80
+        service: 8774
+      novncproxy:
+        default: 6080
+  compute_novnc_proxy:
+    name: nova
+    hosts:
+      default: nova-novncproxy
+      public: novncproxy
+    host_fqdn_override:
+      public:
+        host: compute-vnc.cloud.dev.yogiyo.io
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      # public:
+      #   host: null
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: /vnc_auto.html
+    scheme:
+      default: 'http'
+    port:
+      novnc_proxy:
+        default: 6080
+        public: 80
+  compute_spice_proxy:
+    name: nova
+    hosts:
+      default: nova-spiceproxy
+      public: placement
+    host_fqdn_override:
+      default: null
+    path:
+      default: /spice_auto.html
+    scheme:
+      default: 'http'
+    port:
+      spice_proxy:
+        default: 6082
+  placement:
+    name: placement
+    host_fqdn_override:
+      public:
+        host: placement.cloud.dev.yogiyo.io
+    path:
+      default: /
+    scheme:
+      default: 'http'
+      service: 'http'
+    port:
+      api:
+        default: 8778
+        public: 80
+        service: 8778
+  network:
+    name: neutron
+    host_fqdn_override:
+      public: 
+        host: network.cloud.dev.yogiyo.io
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 9696
+        public: 80
+  baremetal:
+    name: ironic
+    hosts:
+      default: ironic-api
+      public: ironic
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme:
+      default: http
+    port:
+      api:
+        default: 6385
+        public: 80
+  fluentd:
+    namespace: null
+    name: fluentd
+    hosts:
+      default: fluentd-logging
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme: 'http'
+    port:
+      service:
+        default: 24224
+      metrics:
+        default: 24220
+  # NOTE(tp6510): these endpoints allow for things like DNS lookups and ingress
+  # They are using to enable the Egress K8s network policy.
+  kube_dns:
+    namespace: kube-system
+    name: kubernetes-dns
+    hosts:
+      default: kube-dns
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme: http
+    port:
+      dns:
+        default: 53
+        protocol: UDP
+  ingress:
+    namespace: null
+    name: ingress
+    hosts:
+      default: ingress
+    port:
+      ingress:
+        default: 80
+
+pod:
+  use_fqdn:
+    compute: false
+  useHostNetwork:
+    novncproxy: true
+  replicas:
+    api_metadata: 2
+    compute_ironic: 1
+    osapi: 2
+    conductor: 2
+    scheduler: 2
+    novncproxy: 1
+    spiceproxy: 1
+
+manifests:
+  certificates: false
+  configmap_bin: true
+  configmap_etc: true
+  cron_job_cell_setup: true
+  cron_job_service_cleaner: true
+  cron_job_archive_deleted_rows: false
+  daemonset_compute: true
+  deployment_api_metadata: true
+  deployment_api_osapi: true
+  deployment_conductor: true
+  deployment_novncproxy: true
+  deployment_spiceproxy: true
+  deployment_scheduler: true
+  ingress_metadata: true
+  ingress_novncproxy: true
+  ingress_osapi: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_db_drop: false
+  job_image_repo_sync: true
+  job_rabbit_init: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  job_cell_setup: true
+  pdb_metadata: true
+  pdb_osapi: true
+  pod_rally_test: true
+  network_policy: false
+  secret_db_api: true
+  secret_db_cell0: true
+  secret_db: true
+  secret_ingress_tls: true
+  secret_keystone: true
+  secret_rabbitmq: true
+  secret_registry: true
+  service_ingress_metadata: true
+  service_ingress_novncproxy: true
+  service_ingress_osapi: true
+  service_metadata: true
+  service_novncproxy: true
+  service_spiceproxy: true
+  service_osapi: true
+  statefulset_compute_ironic: false

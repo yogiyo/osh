@@ -1,0 +1,377 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Default values for neutron.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+helm3_hook: false
+
+network:
+  server:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+
+bootstrap:
+  enabled: true
+  ks_user: neutron
+  script: |
+    openstack token issue
+
+pod:
+  use_fqdn:
+    neutron_agent: false
+  replicas:
+    server: 3
+    ironic_agent: 1
+
+conf:
+  neutron:
+    DEFAULT:
+      bind_port: null
+      default_availability_zones: nova
+      api_workers: 1
+      rpc_workers: 4
+      allow_overlapping_ips: True
+      state_path: /var/lib/neutron
+      # core_plugin can be: ml2, calico
+      core_plugin: ml2
+      # service_plugin can be: router, odl-router, empty for calico,
+      # networking_ovn.l3.l3_ovn.OVNL3RouterPlugin for OVN
+      service_plugins: router
+      allow_automatic_l3agent_failover: True
+      l3_ha: False
+      max_l3_agents_per_router: 2
+      l3_ha_network_type: vlan
+      network_auto_schedule: True
+      router_auto_schedule: True
+      # (NOTE)portdirect: if unset this is populated dynamically from the value in
+      # 'network.backend' to sane defaults.
+      interface_driver: null
+  plugins:
+    ml2_conf:
+      ml2:
+        extension_drivers: port_security
+        # (NOTE)portdirect: if unset this is populated dyanmicly from the value
+        # in 'network.backend' to sane defaults.
+        mechanism_drivers: openvswitch
+        type_drivers: flat,vlan
+        tenant_network_types: vlan
+      ml2_type_flat:
+        flat_networks: "*"
+      # If you want to use the external network as a tagged provider network,
+      # a range should be specified including the intended VLAN target
+      # using ml2_type_vlan.network_vlan_ranges:
+      ml2_type_vlan:
+        network_vlan_ranges: "internal:100:2048"
+      agent:
+        extensions: ""
+    openvswitch_agent:
+      ovs:
+        bridge_mappings: "external:br-ex,internal:br-internal"
+  dhcp_agent:
+    DEFAULT:
+      # (NOTE)portdirect: if unset this is populated dyanmicly from the value in
+      # 'network.backend' to sane defaults.
+      interface_driver: null
+      dnsmasq_config_file: /etc/neutron/dnsmasq.conf
+      force_metadata: True
+
+  l3_agent:
+    DEFAULT:
+      # (NOTE)portdirect: if unset this is populated dyanmicly from the value in
+      # 'network.backend' to sane defaults.
+      interface_driver: null
+      agent_mode: legacy
+  auto_bridge_add:
+    br-ex: eth3
+    br-internal: eth4
+  metadata_agent:
+    DEFAULT:
+      nova_metadata_port: 8775
+          
+
+endpoints:
+  cluster_domain_suffix: cluster.local
+
+  oslo_messaging:
+    statefulset:
+      replicas: 4
+      name: openstack-rabbitmq-rabbitmq
+
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: lgwXHkx6ZbK04RFFoE+JyQ==
+        secret:
+          tls:
+            internal: mariadb-tls-direct
+      neutron:
+        username: neutron
+        password: dhfMnzRFzI6z0nhhq08TDQ==
+  compute:
+    name: nova
+    hosts:
+      default: nova-api
+      public: nova
+    path:
+      default: "/v2.1/%(tenant_id)s"
+    scheme:
+      default: 'http'
+      public: 'http'
+    port:
+      api:
+        default: 8774
+        public: 80
+      novncproxy:
+        default: 6080
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      metadata:
+        default: 8775
+        internal: 8775
+        public: 8775
+  compute_metadata:
+    name: nova
+    hosts:
+      default: nova-metadata
+      public: nova-metadata
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      metadata:
+        default: 8775
+        public: 8775
+
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: JcNvMAyVVka5eGwG
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      neutron:
+        role: admin
+        region_name: RegionOne
+        username: neutron
+        password: QXCwd0vh7woCRiSu
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      nova:
+        region_name: RegionOne
+        project_name: service
+        username: nova
+        password: nNphw3aPUqhdr2pl
+        user_domain_name: service
+        project_domain_name: service
+      designate:
+        region_name: RegionOne
+        project_name: service
+        username: designate
+        password: password
+        user_domain_name: service
+        project_domain_name: service
+      ironic:
+        region_name: RegionOne
+        project_name: service
+        username: ironic
+        password: password
+        user_domain_name: service
+        project_domain_name: service
+      test:
+        role: admin
+        region_name: RegionOne
+        username: neutron-test
+        password: password
+        # NOTE: this project will be purged and reset if
+        # conf.rally_tests.force_project_purge is set to true
+        # which may be required upon test failure, but be aware that this will
+        # expunge all openstack objects, so if this is used a seperate project
+        # should be used for each helm test, and also it should be ensured
+        # that this project is not in use by other tenants
+        project_name: test
+        user_domain_name: service
+        project_domain_name: service
+    hosts:
+      default: keystone-api
+      internal: keystone-api
+    host_fqdn_override:
+      default: keystone-api.openstack.svc.cluster.local
+      public:
+        host: iam.cloud.dev.yogiyo.io
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 5000
+        internal: 5000
+        public: 80
+  network:
+    name: neutron
+    host_fqdn_override:
+      default: neutron-server.openstack.svc.cluster.local
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      public:
+        host: network.cloud.dev.yogiyo.io
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: null
+    scheme:
+      default: 'http'
+      service: 'http'
+    port:
+      api:
+        default: 9696
+        public: 80
+        service: 9696
+  load_balancer:
+    name: octavia
+    hosts:
+      default: octavia-api
+      public: octavia
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme:
+      default: http
+    port:
+      api:
+        default: 9876
+        public: 80
+  fluentd:
+    namespace: osh-infra
+    name: fluentd
+    hosts:
+      default: fluentd-logging
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme: 'http'
+    port:
+      service:
+        default: 24224
+      metrics:
+        default: 24220
+  dns:
+    name: designate
+    hosts:
+      default: designate-api
+      public: designate
+    host_fqdn_override:
+      default: null
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 9001
+        public: 80
+  baremetal:
+    name: ironic
+    hosts:
+      default: ironic-api
+      public: ironic
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 6385
+        public: 80
+  # NOTE(tp6510): these endpoints allow for things like DNS lookups and ingress
+  # They are using to enable the Egress K8s network policy.
+  kube_dns:
+    namespace: kube-system
+    name: kubernetes-dns
+    hosts:
+      default: kube-dns
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme: http
+    port:
+      dns:
+        default: 53
+        protocol: UDP
+  ingress:
+    namespace: null
+    name: ingress
+    hosts:
+      default: ingress
+    port:
+      ingress:
+        default: 80
+
+
+manifests:
+  certificates: false
+  configmap_bin: true
+  configmap_etc: true
+  daemonset_dhcp_agent: true
+  daemonset_l3_agent: true
+  daemonset_lb_agent: true
+  daemonset_metadata_agent: true
+  daemonset_ovs_agent: true
+  daemonset_sriov_agent: false
+  daemonset_l2gw_agent: false
+  daemonset_bagpipe_bgp: false
+  daemonset_netns_cleanup_cron: true
+  deployment_ironic_agent: false
+  deployment_server: true
+  ingress_server: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_db_drop: false
+  job_image_repo_sync: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  job_rabbit_init: true
+  pdb_server: true
+  pod_rally_test: true
+  network_policy: false
+  secret_db: true
+  secret_ingress_tls: true
+  secret_keystone: true
+  secret_rabbitmq: true
+  secret_registry: true
+  service_ingress_server: true
+  service_server: true
+...
