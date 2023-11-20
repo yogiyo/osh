@@ -1,0 +1,268 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Default values for cinder.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+---
+storage: ceph
+
+pod:
+  replicas:
+    api: 1
+    volume: 1
+    scheduler: 1
+    backup: 1
+bootstrap:
+  enabled: true
+  ks_user: admin
+  bootstrap_conf_backends: true
+
+
+network:
+  api:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 30877
+
+# backup:
+#   external_ceph_rbd:
+#     enabled: false
+#     configmap: external-backup-ceph.conf
+
+ceph_client:
+  enable_external_ceph_backend: True
+  external_ceph:
+    rbd_user: cinder
+    rbd_user_keyring: "AQCPZVtlw2HADBAApD4g6m64aKVZ3o4oAqfskQ=="
+    conf:
+      global:
+        cluster network: 192.168.72.0/24
+        fsid: 514fa0a6-85c0-11ee-a444-511a2c6264c8
+        log_to_syslog: False
+        mon_host: "[v2:192.168.72.11:3300,v1:192.168.72.11:6789],[v2:192.168.72.12:3300,v1:192.168.72.12:6789],[v2:192.168.72.13:3300,v1:192.168.72.13:6789],[v2:192.168.72.14:3300,v1:192.168.72.14:6789]"
+        public network: 192.168.72.0/24
+conf:
+  ceph:
+    admin_keyring: "AQA0clllewY3LRAAFlmuZpxDl5bw0jH3b3a7gg=="
+  cinder:
+    DEFAULT:
+      enabled_backends: "ceph"
+      backup_ceph_pool: openstack-cinder-backeup
+      backup_ceph_user: "k8s"
+      default_volume_type: ceph
+  backends:
+    ceph:
+      volume_driver: cinder.volume.drivers.rbd.RBDDriver
+      volume_backend_name: ceph
+      rbd_pool: openstack-cinder
+      rbd_ceph_conf: "/etc/ceph/external-ceph.conf"
+      rbd_flatten_volume_from_snapshot: False
+      report_discard_supported: True
+      rbd_max_clone_depth: 5
+      rbd_store_chunk_size: 4
+      rados_connect_timeout: -1
+      rbd_user: cinder
+      rbd_secret_uuid: 9113cb92-a0c8-4178-97bb-d8786b3a0573
+      image_volume_cache_enabled: True
+      image_volume_cache_max_size_gb: 200
+      image_volume_cache_max_count: 50
+
+
+# We use a different layout of the endpoints here to account for versioning
+# this swaps the service name and type, and should be rolled out to other
+# services.
+endpoints:
+  cluster_domain_suffix: cluster.local
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: JcNvMAyVVka5eGwG
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      cinder:
+        role: admin,service
+        region_name: RegionOne
+        username: cinder
+        password: password
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      test:
+        role: admin
+        region_name: RegionOne
+        username: cinder-test
+        password: password
+        project_name: test
+        user_domain_name: service
+        project_domain_name: service
+    hosts:
+      default: keystone-api
+      internal: keystone-api
+    host_fqdn_override:
+      public: iam.cloud.dev.yogiyo.io
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 5000
+        internal: 5000
+        public: 80
+  image:
+    name: glance
+    hosts:
+      default: glance-api
+    host_fqdn_override:
+      default: images.cloud.dev.yogiyo.io
+    scheme:
+      default: http
+      public: http
+    port:
+      api:
+        default: 9292
+        public: 80
+  volume:
+    name: cinder
+    hosts:
+      default: cinder-api
+      public: cinder
+    host_fqdn_override:
+     public:
+        host: cinder.cloud.dev.yogiyo.io
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      # public:
+      #   host: null
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: '/v1/%(tenant_id)s'
+    scheme:
+      default: 'http'
+      public: 'http'
+    port:
+      api:
+        default: 8776
+        public: 80
+  volumev2:
+    name: cinderv2
+    hosts:
+      default: cinder-api
+      public: cinder
+    host_fqdn_override:
+     public:
+        host: cinder.cloud.dev.yogiyo.io
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      # public:
+      #   host: null
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: '/v2/%(tenant_id)s'
+    scheme:
+      default: 'http'
+      public: 'http'
+    port:
+      api:
+        default: 8776
+        public: 80
+  volumev3:
+    name: cinderv3
+    hosts:
+      default: cinder-api
+    host_fqdn_override:
+     public:
+        host: cinder.cloud.dev.yogiyo.io
+        # tls:
+        #   crt: null
+        #   key: null
+        #   key: null
+    path:
+      default: '/v3/%(tenant_id)s'
+    scheme:
+      default: 'http'
+      public: 'http'
+    port:
+      api:
+        default: 8776
+        public: 80
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: lgwXHkx6ZbK04RFFoE+JyQ==
+        secret:
+          tls:
+            internal: mariadb-tls-direct
+      cinder:
+        username: cinder
+        password: xl5m363dgKS9S4J+Z99R5sg==
+    host:
+      default: mariadb-server
+    path: /cinder
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  oslo_messaging:
+    auth:
+      admin:
+        username: rabbitmq
+        password: password
+        secret:
+          tls:
+            internal: rabbitmq-tls-direct
+      cinder:
+        username: cinder
+        password: password
+    statefulset:
+      replicas: 4
+      name: openstack-rabbitmq-rabbitmq
+    hosts:
+      default: rabbitmq
+    path: /cinder
+    scheme: rabbit
+    port:
+      amqp:
+        default: 5672
+      http:
+        default: 15672
+
+
+
+# NOTE(helm_hook): helm_hook might break for helm2 binary.
+# set helm3_hook: false when using the helm2 binary.
+helm3_hook: false
+
+tls:
+  identity: false
+  oslo_messaging: false
+  oslo_db: false

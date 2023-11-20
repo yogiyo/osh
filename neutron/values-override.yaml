@@ -337,6 +337,22 @@ endpoints:
       ingress:
         default: 80
 
+dependencies:
+  static:
+    metadata:
+      pod: null
+      jobs:
+        - neutron-rabbit-init
+      services:
+        - endpoint: internal
+          service: oslo_messaging
+        - endpoint: internal
+          service: network
+        - endpoint: internal
+          service: compute
+        - endpoint: default
+          service: compute_metadata
+
 
 manifests:
   certificates: false
