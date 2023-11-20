@@ -151,9 +151,8 @@ endpoints:
         public: 8775
   compute_metadata:
     name: nova
-    hosts:
-      default: nova-metadata
-      public: nova-metadata
+    host_fqdn_override:
+      default: nova-metadata.openstack.svc.cluster.local
     path:
       default: /
     scheme:
@@ -162,7 +161,6 @@ endpoints:
       metadata:
         default: 8775
         public: 8775
-
   identity:
     name: keystone
     auth:
