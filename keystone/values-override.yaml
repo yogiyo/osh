@@ -1,0 +1,123 @@
+helm3_hook: false
+
+conf:
+  keystone:
+    identity:
+      driver: sql
+      default_domain_id: default
+      domain_specific_drivers_enabled: True
+      domain_configurations_from_database: True
+      domain_config_dir: /etc/keystone/domains
+  ks_domains:
+    devops:
+      identity:
+        driver: ldap
+      ldap:
+        url: "ldap://10.0.0.10:389"
+        user: "CN=DevOpsauth,CN=Users,DC=RGPKorea,DC=com"
+        password: "Devops12@!!"
+        suffix: "DC=RGPKorea,DC=com"
+        user_attribute_ignore: "enabled,email,tenants,default_project_id"
+        query_scope: sub
+        user_tree_dn: "OU=Users,OU=RGPKorea,DC=RGPKorea,DC=com"
+        user_objectclass: person
+        user_name_attribute: employeeID
+        user_id_attribute: employeeID
+        user_mail_attribute: email 
+        user_pass_attribute: userPassword
+        user_enabled_attribute: userAccountControl
+        user_enabled_mask: 2
+        user_enabled_invert: false
+        user_enabled_default:  512
+        use_pool: true
+        pool_size: 27
+        pool_retry_max: 3
+        pool_retry_delay: 0.1
+        pool_connection_timeout: 15
+        pool_connection_lifetime: 600
+        use_auth_pool: true
+        auth_pool_size: 100
+        auth_pool_connection_lifetime: 60
+        user_attribute_ignore: password,tenant_id,tenants
+        user_filter: "(| (|(memberOf=CN=SRE Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com)(memberOf=CN=Database Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com))(memberOf=CN=Developer Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com ))"
+network:
+  api:
+    ingress:
+      classes:
+        namespace: "nginx"
+        cluster: "nginx"
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+pod:
+  replicas:
+    api: 2
+
+network_policy:
+  keystone:
+    ingress:
+      - {}
+    egress:
+      - {}
+
+endpoints:
+  identity:
+    namespace: null
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: JcNvMAyVVka5eGwG
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+        default_domain_id: default
+      test:
+        role: admin
+        region_name: RegionOne
+        username: keystone-test
+        password: password
+        project_name: test
+        user_domain_name: default
+        project_domain_name: default
+        default_domain_id: default
+    host_fqdn_override:
+      public:
+        host: iam.cloud.dev.yogiyo.io
+        # tls:
+        #   crt: emtpy
+        #   key: empty
+    path:
+      default: /v3
+    scheme:
+      default: http
+      service: http
+      public: http
+    port:
+      api:
+        default: 5000
+        # NOTE(portdirect): to retain portability across images, and allow
+        # running under a unprivileged user simply, we default to a port > 1000.
+        internal: 5000
+        service: 5000
+        public: 80
+  oslo_messaging:
+    statefulset:
+      replicas: 4
+      name: openstack-rabbitmq-rabbitmq
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: lgwXHkx6ZbK04RFFoE+JyQ==
+      keystone:
+        username: keystone
+        password: gf1Vq6LZ9KSHAI1J7Fah0A==
+    host_fqdn_override:
+      default: mariadb-server
+# Names of secrets used by bootstrap and environmental checks
+# secrets:
+#   tls:
+#     identity:
+#       api:
+#         public: keystone-tls-public
