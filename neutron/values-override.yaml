@@ -153,6 +153,7 @@ endpoints:
     name: nova
     host_fqdn_override:
       default: nova-metadata.openstack.svc.cluster.local
+      public: nova-metadata.openstack.svc.cluster.local
     path:
       default: /
     scheme:
