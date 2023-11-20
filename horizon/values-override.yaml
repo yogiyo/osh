@@ -1,0 +1,144 @@
+network:
+  dashboard:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  external_policy_local: false
+  node_port:
+    enabled: false
+    port: 31000
+
+pod:
+  replicas:
+    server: 3
+
+# typically overridden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  identity:        
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: JcNvMAyVVka5eGwG
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+    host_fqdn_override:
+      public:
+        default: keystone-api
+        host: iam.cloud.dev.yogiyo.io
+    path:
+      default: /v3
+    scheme:
+      default: http
+      internal: http
+      public: http
+    port:
+      api:
+        default: 5000
+        internal: 5000
+        public: 80
+  dashboard:
+    name: horizon
+    hosts:
+      default: horizon-int
+      public: horizon
+    host_fqdn_override:
+      default: null
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      public:
+        host: console.cloud.dev.yogiyo.io
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: null
+    scheme:
+      default: http
+    port:
+      web:
+        default: 80
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: lgwXHkx6ZbK04RFFoE+JyQ==
+        secret:
+          tls:
+            internal: mariadb-tls-direct
+      horizon:
+        username: horizon
+        password: 5/cTlzqTOsLpZl5e/tMhpQ==
+    host_fqdn_override:
+      default: mariadb-server.openstack.svc.cluster.local
+    path: /horizon
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  # NOTE(tp6510): these endpoints allow for things like DNS lookups and ingress
+  # They are using to enable the Egress K8s network policy.
+  kube_dns:
+    namespace: kube-system
+    name: kubernetes-dns
+    hosts:
+      default: kube-dns
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme: http
+    port:
+      dns:
+        default: 53
+        protocol: UDP
+  ingress:
+    namespace: null
+    name: ingress
+    hosts:
+      default: ingress
+    port:
+      ingress:
+        default: 80
+
+network_policy:
+  horizon:
+    ingress:
+      - {}
+    egress:
+      - {}
+
+# NOTE(helm_hook): helm_hook might break for helm2 binary.
+# set helm3_hook: false when using the helm2 binary.
+helm3_hook: false
+
+manifests:
+  certificates: false
+  configmap_bin: true
+  configmap_etc: true
+  configmap_logo: false
+  deployment: true
+  ingress_api: true
+  job_db_init: true
+  job_db_sync: true
+  job_db_drop: false
+  job_image_repo_sync: true
+  pdb: true
+  pod_helm_test: true
+  network_policy: false
+  secret_db: true
+  secret_ingress_tls: true
+  secret_keystone: true
+  secret_registry: true
+  service_ingress: true
+  service: true
+...
