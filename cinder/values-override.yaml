@@ -138,7 +138,7 @@ endpoints:
     hosts:
       default: glance-api
     host_fqdn_override:
-      default: images.cloud.dev.yogiyo.io
+      public: images.cloud.dev.yogiyo.io
     scheme:
       default: http
       public: http
