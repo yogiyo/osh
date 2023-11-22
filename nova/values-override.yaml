@@ -374,7 +374,7 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
       nova:
-        role: admin,service
+        role: service
         region_name: RegionOne
         username: nova
         password: nNphw3aPUqhdr2pl
@@ -410,7 +410,7 @@ endpoints:
         user_domain_name: service
         project_domain_name: service
       cinder:
-        role: admin,service
+        role: service
         region_name: RegionOne
         username: cinder
         password: password

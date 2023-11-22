@@ -104,7 +104,7 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
       cinder:
-        role: admin,service
+        role: service
         region_name: RegionOne
         username: cinder
         password: password
