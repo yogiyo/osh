@@ -134,6 +134,8 @@ conf:
       auth_version: v3
     database:
       max_retries: -1
+    cinder:
+      max_retries: -1
     api_database:
       max_retries: -1
     cell0_database:
@@ -156,6 +158,8 @@ conf:
       disk_cachemodes: "network=writeback"
       hw_disk_discard: unmap
       cpu_mode: "host-passthrough"
+      device_detach_timeout : 30
+      device_detach_attempts: 20
     upgrade_levels:
       compute: auto
     cache:
