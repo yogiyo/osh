@@ -81,6 +81,8 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
         default_domain_id: default
+    hosts:
+      admin: keystone-api
     host_fqdn_override:
       public:
         host: iam.cloud.dev.yogiyo.io
@@ -99,7 +101,6 @@ endpoints:
         # NOTE(portdirect): to retain portability across images, and allow
         # running under a unprivileged user simply, we default to a port > 1000.
         internal: 5000
-        service: 5000
         public: 80
   oslo_messaging:
     statefulset:

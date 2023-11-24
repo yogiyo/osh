@@ -35,6 +35,8 @@ endpoints:
       default: keystone-api
       internal: keystone-api
     host_fqdn_override:
+      default: 
+        host: keystone-api.openstack.svc.cluster.local
       public:
         host: iam.cloud.dev.yogiyo.io
     path:

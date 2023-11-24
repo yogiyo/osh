@@ -52,8 +52,8 @@ network:
 ceph_client:
   enable_external_ceph_backend: True
   external_ceph:
-    rbd_user: cinder
-    rbd_user_keyring: "AQCPZVtlw2HADBAApD4g6m64aKVZ3o4oAqfskQ=="
+    rbd_user: k8s
+    rbd_user_keyring: "AQB7OFhlAVriDxAA0YJrM9mAT6o1zD9D00A//g=="
     conf:
       global:
         cluster network: 192.168.72.0/24
@@ -61,9 +61,13 @@ ceph_client:
         log_to_syslog: False
         mon_host: "[v2:192.168.72.11:3300,v1:192.168.72.11:6789],[v2:192.168.72.12:3300,v1:192.168.72.12:6789],[v2:192.168.72.13:3300,v1:192.168.72.13:6789],[v2:192.168.72.14:3300,v1:192.168.72.14:6789]"
         public network: 192.168.72.0/24
+
+secrets:
+  rbd:
+    volume_external: ceph-cinder-keyrings
 conf:
   ceph:
-    admin_keyring: "AQA0clllewY3LRAAFlmuZpxDl5bw0jH3b3a7gg=="
+    admin_keyring: "AQBZaGBlJMYdKBAASZ4AijcifRvxdin1N71RrA=="
   cinder:
     DEFAULT:
       enabled_backends: "ceph"
@@ -81,7 +85,7 @@ conf:
       rbd_max_clone_depth: 5
       rbd_store_chunk_size: 4
       rados_connect_timeout: -1
-      rbd_user: cinder
+      rbd_user: k8s
       rbd_secret_uuid: 9113cb92-a0c8-4178-97bb-d8786b3a0573
       image_volume_cache_enabled: True
       image_volume_cache_max_size_gb: 200
@@ -104,7 +108,7 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
       cinder:
-        role: service
+        role: admin,service
         region_name: RegionOne
         username: cinder
         password: password

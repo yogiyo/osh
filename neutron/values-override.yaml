@@ -173,7 +173,7 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
       neutron:
-        role: admin
+        role: service
         region_name: RegionOne
         username: neutron
         password: QXCwd0vh7woCRiSu

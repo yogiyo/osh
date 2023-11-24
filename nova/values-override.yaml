@@ -64,10 +64,10 @@ ceph_client:
 conf:
   ceph:
     enabled: true
-    admin_keyring: AQA0clllewY3LRAAFlmuZpxDl5bw0jH3b3a7gg==
+    admin_keyring: AQBZaGBlJMYdKBAASZ4AijcifRvxdin1N71RrA==
     cinder:
-      user: "cinder"
-      keyring: AQCPZVtlw2HADBAApD4g6m64aKVZ3o4oAqfskQ==
+      user: "k8s"
+      keyring: AQB7OFhlAVriDxAA0YJrM9mAT6o1zD9D00A//g==
       secret_uuid: 9113cb92-a0c8-4178-97bb-d8786b3a0573
   libvirt:
     # Get the IP address to be used as the target for live migration traffic using interface name.
@@ -374,7 +374,7 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
       nova:
-        role: service
+        role: admin,service
         region_name: RegionOne
         username: nova
         password: nNphw3aPUqhdr2pl
@@ -402,7 +402,7 @@ endpoints:
         username: ironic
         password: password
       placement:
-        role: admin
+        role: service
         region_name: RegionOne
         username: placement
         password: FwtGRVzOcgQjKAoB
