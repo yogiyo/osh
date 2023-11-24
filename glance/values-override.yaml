@@ -89,7 +89,7 @@ endpoints:
     name: glance
     host_fqdn_override:
       public:
-        host: images.cloud.dev.yogiyo.io
+        host: image.cloud.dev.yogiyo.io
         tls:
           crt: tmp
           key: tmp
