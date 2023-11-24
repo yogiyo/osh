@@ -30,7 +30,7 @@ network:
         namespace: "nginx"
         cluster: "nginx"
       annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        # cert-manager.io/cluster-issuer: letsencrypt-prod
         nginx.ingress.kubernetes.io/rewrite-target: /
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
 
@@ -39,11 +39,11 @@ volume:
   size: 1000Gi
 
 # Names of secrets used by bootstrap and environmental checks
-secrets:
-  tls:
-    image:
-      api:
-        public: glance-tls-public
+# secrets:
+#   tls:
+#     image:
+#       api:
+#         public: glance-tls-public
 
 # typically overridden by environmental
 # values, but should include all endpoints
@@ -90,9 +90,9 @@ endpoints:
     host_fqdn_override:
       public:
         host: image.cloud.dev.yogiyo.io
-        tls:
-          crt: tmp
-          key: tmp
+        # tls:
+        #   crt: tmp
+        #   key: tmp
     scheme:
       default: http
       service: http
