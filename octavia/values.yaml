@@ -37,6 +37,8 @@ labels:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
 
+helm3_hook: false
+
 images:
   tags:
     test: docker.io/xrally/xrally-openstack:2.0.0

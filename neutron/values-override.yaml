@@ -256,13 +256,12 @@ endpoints:
     name: octavia
     hosts:
       default: octavia-api
-      public: octavia
     host_fqdn_override:
-      default: null
-    path:
-      default: null
+      public:
+        host: lb.cloud.dev.yogiyo.io
     scheme:
       default: http
+      public: http
     port:
       api:
         default: 9876
