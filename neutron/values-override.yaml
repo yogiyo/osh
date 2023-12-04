@@ -65,7 +65,7 @@ conf:
   plugins:
     ml2_conf:
       ml2:
-        extension_drivers: port_security
+        extension_drivers: port_security,dns_domain_ports
         # (NOTE)portdirect: if unset this is populated dyanmicly from the value
         # in 'network.backend' to sane defaults.
         mechanism_drivers: openvswitch
@@ -77,12 +77,12 @@ conf:
       # a range should be specified including the intended VLAN target
       # using ml2_type_vlan.network_vlan_ranges:
       ml2_type_vlan:
-        network_vlan_ranges: "internal:100:2048"
+        network_vlan_ranges: "internal:100:2100"
       agent:
         extensions: ""
     openvswitch_agent:
       ovs:
-        bridge_mappings: "external:br-ex,internal:br-internal"
+        bridge_mappings: "external:br-ex,internal:br-internal,office:br-office"
   dhcp_agent:
     DEFAULT:
       # (NOTE)portdirect: if unset this is populated dyanmicly from the value in
@@ -100,6 +100,7 @@ conf:
   auto_bridge_add:
     br-ex: eth3
     br-internal: eth4
+    br-office: eth5
   metadata_agent:
     DEFAULT:
       nova_metadata_port: 8775
@@ -173,7 +174,7 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
       neutron:
-        role: service
+        role: admin
         region_name: RegionOne
         username: neutron
         password: QXCwd0vh7woCRiSu
@@ -191,7 +192,7 @@ endpoints:
         region_name: RegionOne
         project_name: service
         username: designate
-        password: password
+        password: dXx22dyVzca3ex1c
         user_domain_name: service
         project_domain_name: service
       ironic:
@@ -285,9 +286,9 @@ endpoints:
     name: designate
     hosts:
       default: designate-api
-      public: designate
     host_fqdn_override:
-      default: null
+      public:
+        host: dns.cloud.dev.yogiyo.io
     path:
       default: /
     scheme:

@@ -67,7 +67,7 @@ secrets:
     volume_external: ceph-cinder-keyrings
 conf:
   ceph:
-    admin_keyring: "AQBZaGBlJMYdKBAASZ4AijcifRvxdin1N71RrA=="
+    admin_keyring: "AQDLNGhlTqB3DRAALRwsw5VgiZB3hBxlT3N+pQ=="
   cinder:
     DEFAULT:
       enabled_backends: "ceph"
@@ -112,6 +112,14 @@ endpoints:
         region_name: RegionOne
         username: cinder
         password: password
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      nova:
+        role: service
+        region_name: RegionOne
+        username: nova
+        password: nNphw3aPUqhdr2pl
         project_name: service
         user_domain_name: service
         project_domain_name: service

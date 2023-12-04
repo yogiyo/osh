@@ -64,7 +64,7 @@ ceph_client:
 conf:
   ceph:
     enabled: true
-    admin_keyring: AQBZaGBlJMYdKBAASZ4AijcifRvxdin1N71RrA==
+    admin_keyring: AQDLNGhlTqB3DRAALRwsw5VgiZB3hBxlT3N+pQ==
     cinder:
       user: "k8s"
       keyring: AQB7OFhlAVriDxAA0YJrM9mAT6o1zD9D00A//g==
