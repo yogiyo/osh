@@ -39,7 +39,7 @@ conf:
         auth_pool_size: 100
         auth_pool_connection_lifetime: 60
         user_attribute_ignore: password,tenant_id,tenants
-        user_filter: "(| (|(memberOf=CN=SRE Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com)(memberOf=CN=Database Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com))(memberOf=CN=Developer Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com ))"
+        user_filter: "(| (|(memberOf=CN=SRE Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com)(memberOf=CN=Cloud Architect,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com))(memberOf=CN=Developer Platform,OU=Organization,OU=Groups,OU=RGPKorea,DC=RGPKorea,DC=com ))"
 network:
   api:
     ingress:
